@@ -15,7 +15,7 @@ add_executable(rpi2350_ha
 )
 
 # Add pico_stdlib library which aggregates commonly used features
-target_link_libraries(rpi2350_ha pico_stdlib)
+target_link_libraries(rpi2350_ha pico_stdlib pico_cyw43_arch_none)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(rpi2350_ha 1)
