@@ -5,6 +5,8 @@ cmake_minimum_required(VERSION 3.13...3.27)
 include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
 include(FreeRTOS_Kernel_import.cmake)
 
+set(PICO_PLATFORM=rp2350)
+
 project(my_project)
 
 # initialize the Raspberry Pi Pico SDK
@@ -13,6 +15,11 @@ pico_sdk_init()
 # rest of your project
 add_executable(rpi2350_ha
     rpi2350_ha_main.c
+)
+
+# Add include directories
+target_include_directories(rpi2350_ha
+    PUBLIC ${FREERTOS_KERNEL_PATH}/include
 )
 
 # Add pico_stdlib library which aggregates commonly used features
