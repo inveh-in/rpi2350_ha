@@ -4,7 +4,16 @@
  */
 #include "rpi2350_ha_main_inf.h"
 
+/* Private definition */
 #define LED_DELAY_MS 1000
+
+// Priorities of our threads - higher numbers are higher priority
+#define CORE0_TASK_PRIORITY    ( tskIDLE_PRIORITY + 4UL )
+#define CORE1_TASK_PRIORITY    ( tskIDLE_PRIORITY + 2UL )
+
+// Stack sizes of our threads in words (4 bytes)
+#define CORE0_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
+#define CORE1_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 
 // Perform initialisation
 int rpi2350_ha_init(void) 
@@ -23,16 +32,54 @@ void pico_set_led(bool led_on) {
     cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, led_on);
 }
 
-int main() {
-
-    hard_assert(rpi2350_ha_init() == PICO_OK);
-
+void rpi2350_ha_core0_proc(__unused void *params) 
+{
     while (true) 
     {
         pico_set_led(true);
-        sleep_ms(LED_DELAY_MS);
+        busy_wait_ms(LED_DELAY_MS);
         pico_set_led(false);
-        sleep_ms(LED_DELAY_MS);
-        printf("Hello, world!\n");
+        busy_wait_ms(LED_DELAY_MS);
+
+        static int last_core_id = -1;
+        if (portGET_CORE_ID() != last_core_id) {
+            last_core_id = portGET_CORE_ID();
+            printf("worker is on core %d\n", last_core_id);
+        }
     }
+}
+
+void rpi2350_ha_core1_proc(__unused void *params) 
+{
+    while (true) 
+    {
+        printf("Hello, world!\n");
+
+        static int last_core_id = -1;
+        if (portGET_CORE_ID() != last_core_id) {
+            last_core_id = portGET_CORE_ID();
+            printf("worker is on core %d\n", last_core_id);
+        }
+    }
+}
+
+int main() {
+
+    TaskHandle_t taskHandle_Core0;
+    TaskHandle_t taskHandle_Core1;
+
+    hard_assert(rpi2350_ha_init() == PICO_OK);
+
+    // we must bind the main task to core0
+    xTaskCreate(rpi2350_ha_core0_proc, "MainThread", CORE0_TASK_STACK_SIZE, NULL, CORE0_TASK_PRIORITY, &taskHandle_Core0);
+    vTaskCoreAffinitySet(taskHandle_Core0, 0);
+
+    // we must bind the main task to core1
+    xTaskCreate(rpi2350_ha_core0_proc, "MainThread", CORE0_TASK_STACK_SIZE, NULL, CORE0_TASK_PRIORITY, &taskHandle_Core1);
+    vTaskCoreAffinitySet(taskHandle_Core1, 1);
+
+    /* Start the tasks and timer running. */
+    vTaskStartScheduler();
+
+    return 0;
 }
