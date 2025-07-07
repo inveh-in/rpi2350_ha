@@ -25,8 +25,8 @@
  * 1 tab == 4 spaces!
  */
 
-#ifndef FREERTOSCONFIG_H
-#define FREERTOSCONFIG_H
+#ifndef FREERTOS_CONFIG_H
+#define FREERTOS_CONFIG_H
 
 /*-----------------------------------------------------------
  * Application specific definitions.
@@ -153,5 +153,5 @@ to exclude the API function. */
 
 /* A header file that defines trace macro can be included here. */
 
-#endif /* FREERTOSCONFIG_H */
+#endif /* FREERTOS_CONFIG_H */
 
