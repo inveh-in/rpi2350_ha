@@ -1,9 +1,21 @@
 cmake_minimum_required(VERSION 3.13...3.27)
 
+set(FREERTOS_KERNEL_PATH "/home/priyanka/FreeRTOS-Kernel")
+set(PICO_SDK_PATH "/home/priyanka/pico-sdk")
+set(PICOTOOL_FETCH_FROM_GIT_PATH "/home/priyanka/picotool")
+
+# Add the freertos_config for FreeRTOS-Kernel
+add_library(freertos_config INTERFACE)
+
+target_include_directories(freertos_config
+    INTERFACE
+    "rtos_config/"
+)
+
 # initialize the SDK based on PICO_SDK_PATH
 # note: this must happen before project()
-include($ENV{PICO_SDK_PATH}/external/pico_sdk_import.cmake)
-include(FreeRTOS_Kernel_import.cmake)
+include(${PICO_SDK_PATH}/external/pico_sdk_import.cmake)
+include(rtos_config/FreeRTOS_Kernel_import.cmake)
 
 set(PICO_PLATFORM=rp2350)
 
