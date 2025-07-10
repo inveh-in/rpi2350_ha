@@ -50,7 +50,7 @@ void rpi2350_ha_core1_proc(__unused void *params)
     while (true) 
     {
         printf("2nd worker is on core %d\n", portGET_CORE_ID());
-        busy_wait_ms(LED_DELAY_MS);
+        busy_wait_ms(2*LED_DELAY_MS);
     }
 }
 
@@ -63,11 +63,11 @@ int main() {
 
     // we must bind the main task to core0
     xTaskCreate(rpi2350_ha_core0_proc, "MainThread", CORE0_TASK_STACK_SIZE, NULL, CORE0_TASK_PRIORITY, &taskHandle_Core0);
-    vTaskCoreAffinitySet(taskHandle_Core0, 0);
+    vTaskCoreAffinitySet(taskHandle_Core0, ( 1 << 0 ));
 
     // we must bind the main task to core1
     xTaskCreate(rpi2350_ha_core1_proc, "MainThread", CORE1_TASK_STACK_SIZE, NULL, CORE1_TASK_PRIORITY, &taskHandle_Core1);
-    vTaskCoreAffinitySet(taskHandle_Core1, 1);
+    vTaskCoreAffinitySet(taskHandle_Core1, ( 1 << 1 ));
 
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
