@@ -21,7 +21,7 @@ pico_sdk_init()
 
 # rest of your project
 add_executable(rpi2350_ha
-    rpi2350_ha_main.c
+    rpi2350_ha_main.cpp
 )
 
 # Add include directories
