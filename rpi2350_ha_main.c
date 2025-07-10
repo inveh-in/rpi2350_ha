@@ -41,11 +41,7 @@ void rpi2350_ha_core0_proc(__unused void *params)
         pico_set_led(false);
         busy_wait_ms(LED_DELAY_MS);
 
-        static int last_core_id = -1;
-        if (portGET_CORE_ID() != last_core_id) {
-            last_core_id = portGET_CORE_ID();
-            printf("worker is on core %d\n", last_core_id);
-        }
+        printf("1st worker is on core %d\n", portGET_CORE_ID());
     }
 }
 
@@ -53,13 +49,8 @@ void rpi2350_ha_core1_proc(__unused void *params)
 {
     while (true) 
     {
-        printf("Hello, world!\n");
-
-        static int last_core_id = -1;
-        if (portGET_CORE_ID() != last_core_id) {
-            last_core_id = portGET_CORE_ID();
-            printf("worker is on core %d\n", last_core_id);
-        }
+        printf("2nd worker is on core %d\n", portGET_CORE_ID());
+        busy_wait_ms(LED_DELAY_MS);
     }
 }
 
