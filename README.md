@@ -8,11 +8,11 @@ cd paho.mqtt.c
 mkdir build
 cd build
 
-$ cmake -DPAHO_WITH_SSL=FALSE -DPAHO_BUILD_SAMPLES=TRUE \
+$ cmake -GNinja -DPAHO_WITH_SSL=FALSE -DPAHO_BUILD_SAMPLES=TRUE \
     -DPAHO_BUILD_DOCUMENTATION=TRUE \
     -DOPENSSL_LIB_SEARCH_PATH=/tmp/libssl-dev/usr/lib/arm-linux-gnueabihf \
-    -DOPENSSL_INC_SEARCH_PATH=/tmp/libssl-dev/usr/include/arm-linux-gnueabihf \
-    -DCMAKE_TOOLCHAIN_FILE=/home/priyanka/paho.mqtt.c/cmake/toolchain.linux-arm11.cmake \
+    -DOPENSSL_INC_SEARCH_PATH="/tmp/libssl-dev/usr/include/openssl;/tmp/libssl-dev/usr/include/arm-linux-gnueabihf" \
+    -DCMAKE_TOOLCHAIN_FILE=~/paho.mqtt.c/cmake/toolchain.linux-arm11.cmake \
     ~/paho.mqtt.c
 
 cmake --build .
