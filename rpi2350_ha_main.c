@@ -15,6 +15,9 @@
 #define CORE0_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 #define CORE1_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 
+MQTTClient client;
+MQTTClient_connectOptions conn_opts = MQTTClient_connectOptions_initializer;
+
 // Perform initialisation
 int rpi2350_ha_init(void) 
 {
@@ -47,6 +50,14 @@ void rpi2350_ha_core0_proc(__unused void *params)
 
 void rpi2350_ha_core1_proc(__unused void *params) 
 {
+    int rc;
+
+    conn_opts.keepAliveInterval = 10;
+    conn_opts.cleansession = 1;
+    conn_opts.username = "username";
+    conn_opts.password = "password";
+    rc = MQTTClient_connect(client, &conn_opts);
+
     while (true) 
     {
         printf("2nd worker is on core %d\n", portGET_CORE_ID());
