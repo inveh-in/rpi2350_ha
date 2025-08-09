@@ -35,7 +35,6 @@ target_link_libraries(rpi2350_ha FreeRTOS-Kernel
 FreeRTOS-Kernel-Heap4 
 pico_stdlib
 pico_cyw43_arch_lwip_poll
-picow_udp_beacon_poll
 )
 
 # enable usb output, disable uart output
