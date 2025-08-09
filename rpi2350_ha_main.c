@@ -84,7 +84,7 @@ void rpi2350_ha_core1_proc(__unused void *params)
         err_t er = udp_sendto(pcb, p, &addr, UDP_PORT);
         pbuf_free(p);
         if (er != ERR_OK) {
-            printf("Failed to send UDP packet! error=%d", er);
+            printf("Failed to send UDP packet! error=%d\n", er);
         } else {
             printf("Sent packet %d\n", counter);
             counter++;
