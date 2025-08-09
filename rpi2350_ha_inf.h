@@ -3,6 +3,9 @@
  *
  */
 
+#ifndef _RPI2350_HA_INF_H
+#define _RPI2350_HA_INF_H
+
 #include <stdio.h>
 
 #include "pico/stdlib.h"
@@ -11,3 +14,8 @@
 
 #include "FreeRTOS.h"
 #include "task.h"
+
+#include "lwip/pbuf.h"
+#include "lwip/udp.h"
+
+#endif /* _RPI2350_HA_INF_H */

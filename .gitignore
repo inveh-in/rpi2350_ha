@@ -1,2 +1,3 @@
 build/*
 .vscode/*
+rpi2350_ha_priv.h
