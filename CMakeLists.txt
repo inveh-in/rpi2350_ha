@@ -30,10 +30,8 @@ target_include_directories(rpi2350_ha
     PUBLIC ${FREERTOS_KERNEL_PATH}/include
 )
 
-find_package(eclipse-paho-mqtt-c REQUIRED)
-
 # Add pico_stdlib library which aggregates commonly used features
-target_link_libraries(rpi2350_ha FreeRTOS-Kernel FreeRTOS-Kernel-Heap4 pico_stdlib pico_cyw43_arch_none eclipse-paho-mqtt-c::paho-mqtt3c)
+target_link_libraries(rpi2350_ha FreeRTOS-Kernel FreeRTOS-Kernel-Heap4 pico_stdlib pico_cyw43_arch_none)
 
 # enable usb output, disable uart output
 pico_enable_stdio_usb(rpi2350_ha 1)
