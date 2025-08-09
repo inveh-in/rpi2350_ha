@@ -62,7 +62,6 @@ void rpi2350_ha_core1_proc(__unused void *params)
     if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) 
     {
         printf("failed to connect.\n");
-        return 1;
     } 
     else 
     {
