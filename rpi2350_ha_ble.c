@@ -4,6 +4,7 @@
  */
 #include "rpi2350_ha_inf.h"
 #include "rpi2350_ha_priv.h"
+#include "rpi2350_ha_pub.h"
 
 static device_state_t current_state = DEVICE_START_UP;
 static wifi_setting_t wifi_setting;
@@ -591,5 +592,4 @@ void rpi2350_ha_ble_proc(__unused void *params)
             att_server_request_can_send_now_event(con_handle);
         }
     }
-    return 0;
 }

@@ -4,6 +4,7 @@
  */
 #include "rpi2350_ha_inf.h"
 #include "rpi2350_ha_priv.h"
+#include "rpi2350_ha_pub.h"
 
 /* Private definition */
 #define LED_DELAY_MS 1000

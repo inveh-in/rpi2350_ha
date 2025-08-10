@@ -19,6 +19,7 @@
 /* for LwIP */
 #include "lwip/pbuf.h"
 #include "lwip/udp.h"
+#include "wifi_provisioning.h"
 
 /* for BLE */
 #include "btstack.h"
