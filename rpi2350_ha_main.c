@@ -6,9 +6,6 @@
 #include "rpi2350_ha_priv.h"
 #include "rpi2350_ha_pub.h"
 
-/* Private definition */
-#define LED_DELAY_MS 1000
-
 // Priorities of our threads - higher numbers are higher priority
 #define CORE0_TASK_PRIORITY    ( tskIDLE_PRIORITY + 4UL )
 #define CORE1_TASK_PRIORITY    ( tskIDLE_PRIORITY + 2UL )

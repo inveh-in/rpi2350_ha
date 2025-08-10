@@ -16,12 +16,14 @@ typedef enum {
     IP_ADDRESS_USER_DESCRIPTION_HANDLE = ATT_CHARACTERISTIC_be3d7603_0ea0_4e96_82e0_89aa6a3dc19f_01_USER_DESCRIPTION_HANDLE,
 } attribute_handle_t;
 
-device_state_t current_state = DEVICE_START_UP;
-wifi_setting_t wifi_setting;
+static device_state_t current_state = DEVICE_START_UP;
+static wifi_setting_t wifi_setting;
 static int le_notification_enabled;
 hci_con_handle_t con_handle;
 static btstack_packet_callback_registration_t hci_event_callback_registration;
 static btstack_packet_callback_registration_t sm_event_callback_registration;
+
+static void process_event(device_event_t event);
 
 #define APP_AD_FLAGS 0x06
 
@@ -216,7 +218,7 @@ static void state_entry_action(device_state_t state) {
  *
  * @param event The device event to process.
  */
-void process_event(device_event_t event) {
+static void process_event(device_event_t event) {
     device_state_t new_state = state_transition(current_state, event);
     printf("[EVENT] Processing: %s, current state: %s -> new state: %s\n",
            device_event_string(event), device_state_string(current_state),
@@ -541,10 +543,14 @@ static void sm_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
 }
 
 /**
- * @brief Initializes the Bluetooth Low Energy (BLE) stack.
+ * @brief Initializes the wifi and Bluetooth Low Energy (BLE) stack.
  */
-void rpi2350_ha_ble_init(void) 
-{
+void rpi2350_ha_ble_init(void) {
+    if (cyw43_arch_init()) {
+        panic("failed to initialize cyw43_arch\n");
+    }
+    cyw43_arch_enable_sta_mode();
+
     l2cap_init();
     sm_init();
     att_server_init(profile_data, att_read_callback, att_write_callback);
@@ -559,6 +565,56 @@ void rpi2350_ha_ble_init(void)
     sm_set_authentication_requirements(SM_AUTHREQ_NO_BONDING);
 
     hci_power_control(HCI_POWER_ON);
+}
+
+/**
+ * @brief Periodically checks the Wi-Fi link status and processes relevant events.
+ */
+static void wifi_task(void) {
+    int status;
+
+    switch (current_state) {
+        case DEVICE_WIFI_LINK_TO_UP:
+            status = cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA);
+            printf("[WIFI] Link status: %d\n", status);
+            if (status == CYW43_LINK_JOIN) {
+                process_event(EVENT_WIFI_CONNECTED);
+            } else if (status < 0) {
+                process_event(EVENT_WIFI_ERROR);
+            }
+            break;
+        case DEVICE_WIFI_LINK_UP:
+            status = cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA);
+            if (status == CYW43_LINK_NONET) {
+                printf("[WIFI] Error: No matching SSID found\n");
+                wifi_setting.ssid[0] = '\0';
+                process_event(EVENT_WIFI_ERROR);
+            } else if (status == CYW43_LINK_BADAUTH) {
+                printf("[WIFI] Error: Authentication failure\n");
+                wifi_setting.password[0] = '\0';
+                process_event(EVENT_WIFI_ERROR);
+            }
+
+            if (status == CYW43_LINK_JOIN && (*(uint32_t *)&cyw43_state.netif[0].ip_addr) != 0) {
+                char *ip_address = ip4addr_ntoa(&cyw43_state.netif[0].ip_addr);
+                strcpy(wifi_setting.ip_address, ip_address);
+                printf("[WIFI] Acquired IP address: %s\n", wifi_setting.ip_address);
+                wifi_setting.link_status = 1;
+
+                process_event(EVENT_IP_ACQUIRED);
+            }
+            break;
+        case DEVICE_WIFI_LINK_CONNECTED:
+            process_event(EVENT_WIFI_CONNECTED);
+            break;
+        case DEVICE_WIFI_LINK_DOWN:
+            if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) {
+                process_event(EVENT_WIFI_CONNECT);
+            }
+            break;
+        default:
+            break;
+    }
 }
 
 #define LED_BLINK_INTERVAL_US 500000
@@ -595,8 +651,11 @@ void rpi2350_ha_ble_proc(__unused void *params)
     current_state = DEVICE_START_UP;
     printf("[MAIN] BLE Wi-Fi provisioning started\n");
 
+    rpi2350_ha_ble_init();
+
     process_event(EVENT_WIFI_CONFIGURED);
     while (true) {
+        wifi_task();
         device_task();
 
         if (le_notification_enabled) {
