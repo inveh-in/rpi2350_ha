@@ -16,12 +16,6 @@
 #define CORE0_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 #define CORE1_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 
-/* Value for the UDP protocol */
-#define UDP_PORT 13400
-#define BEACON_MSG_LEN_MAX 4    /* actual length would be +1 */
-#define BEACON_TARGET "255.255.255.255"
-#define BEACON_INTERVAL_MS 1000
-
 // Turn the led on or off
 void pico_set_led(bool led_on) {
     // Ask the wifi "driver" to set the GPIO on or off
@@ -38,51 +32,18 @@ void rpi2350_ha_init(void)
     retVal = cyw43_arch_init();
     hard_assert(retVal == PICO_OK);
 
-    cyw43_arch_enable_sta_mode();
-    
-    retVal = cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000);
-    hard_assert(retVal == PICO_OK);
+    rpi2350_ha_wifi_init();
+    rpi2350_ha_ble_init();
 }
 
 void rpi2350_ha_core0_proc(__unused void *params) 
 {
-    while (true) 
-    {
-        pico_set_led(true);
-        busy_wait_ms(LED_DELAY_MS);
-        pico_set_led(false);
-        busy_wait_ms(LED_DELAY_MS);
-    }
+    rpi2350_ha_ble_proc(params);
 }
 
 void rpi2350_ha_core1_proc(__unused void *params) 
 {
-    struct udp_pcb* pcb = udp_new();
-    ip_addr_t addr;
-    ipaddr_aton(BEACON_TARGET, &addr);
-
-    int counter = 0;
-
-    while (true) 
-    {        
-        struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX+1, PBUF_RAM);
-        char *req = (char *)p->payload;
-        memset(req, 0, BEACON_MSG_LEN_MAX+1);
-        snprintf(req, BEACON_MSG_LEN_MAX, "%d\n", counter);
-        err_t er = udp_sendto(pcb, p, &addr, UDP_PORT);
-        pbuf_free(p);
-        if (er != ERR_OK) {
-            printf("Failed to send UDP packet! error=%d\n", er);
-        } else {
-            printf("Sent packet %d\n", counter);
-            counter++;
-        }
-
-        cyw43_arch_poll();
-        sleep_ms(BEACON_INTERVAL_MS);
-    }
-
-    cyw43_arch_deinit();
+    rpi2350_ha_wifi_proc(params);
 }
 
 int main() {

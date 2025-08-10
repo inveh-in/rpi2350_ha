@@ -21,6 +21,8 @@ pico_sdk_init()
 
 # rest of your project
 add_executable(rpi2350_ha
+    rpi2350_ha_ble.c
+    rpi2350_ha_wifi.c
     rpi2350_ha_main.c
 )
 
@@ -35,6 +37,8 @@ target_link_libraries(rpi2350_ha FreeRTOS-Kernel
 FreeRTOS-Kernel-Heap4 
 pico_stdlib
 pico_cyw43_arch_lwip_poll
+pico_btstack_ble
+pico_btstack_cyw43
 )
 
 # enable usb output, disable uart output
