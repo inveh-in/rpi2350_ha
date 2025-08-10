@@ -32,7 +32,7 @@ void rpi2350_ha_wifi_proc(__unused void *params)
 
     while (true) 
     {                
-        if(0)
+        if(rpi2350_wifiEna_st)
         {
             struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX+1, PBUF_RAM);
             char *req = (char *)p->payload;

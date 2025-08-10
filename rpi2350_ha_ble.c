@@ -22,6 +22,7 @@ static int le_notification_enabled;
 hci_con_handle_t con_handle;
 static btstack_packet_callback_registration_t hci_event_callback_registration;
 static btstack_packet_callback_registration_t sm_event_callback_registration;
+int rpi2350_wifiEna_st = 0;
 
 static void process_event(device_event_t event);
 
@@ -162,6 +163,7 @@ static void state_entry_action(device_state_t state) {
                 "[STATE] Entering: DEVICE_WIFI_LINK_TO_UP, attempting Wi-Fi connection to SSID: "
                 "%s\n",
                 wifi_setting.ssid);
+            rpi2350_wifiEna_st = 0;
             cyw43_arch_enable_sta_mode();
             int rc = cyw43_wifi_leave(&cyw43_state, CYW43_ITF_STA);
             rc = cyw43_arch_wifi_connect_async(wifi_setting.ssid, wifi_setting.password,
@@ -174,9 +176,11 @@ static void state_entry_action(device_state_t state) {
         }
         case DEVICE_WIFI_LINK_UP:
             printf("[STATE] Entering: DEVICE_WIFI_LINK_UP, waiting for IP address...\n");
+            rpi2350_wifiEna_st = 0;
             break;
         case DEVICE_WIFI_LINK_CONNECTED: {
             printf("[STATE] Entering: DEVICE_WIFI_LINK_CONNECTED, Wi-Fi connected\n");
+            rpi2350_wifiEna_st = 0;
             if (con_handle != HCI_CON_HANDLE_INVALID) {
                 notify_string_t notify;
                 notify.data = wifi_setting.ip_address;
@@ -191,6 +195,7 @@ static void state_entry_action(device_state_t state) {
         }
         case DEVICE_WIFI_LINK_DOWN: {
             printf("[STATE] Entering: DEVICE_WIFI_LINK_DOWN\n");
+            rpi2350_wifiEna_st = 0;
             cyw43_wifi_leave(&cyw43_state, CYW43_ITF_STA);
             cyw43_cb_tcpip_deinit(&cyw43_state, 0);
             cyw43_cb_tcpip_deinit(&cyw43_state, 1);
@@ -207,6 +212,7 @@ static void state_entry_action(device_state_t state) {
         }
         case DEVICE_RUNNING:
             printf("[STATE] Entering: DEVICE_RUNNING, device is fully operational\n");
+            rpi2350_wifiEna_st = 1;
             break;
         default:
             break;
