@@ -38,7 +38,7 @@ target_include_directories(rpi2350_ha
 target_link_libraries(rpi2350_ha FreeRTOS-Kernel 
 FreeRTOS-Kernel-Heap4 
 pico_stdlib
-pico_cyw43_arch_lwip_poll
+pico_cyw43_arch_lwip_threadsafe_background
 pico_btstack_ble
 pico_btstack_cyw43
 )
