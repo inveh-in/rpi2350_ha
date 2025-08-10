@@ -52,8 +52,6 @@ void rpi2350_ha_core0_proc(__unused void *params)
         busy_wait_ms(LED_DELAY_MS);
         pico_set_led(false);
         busy_wait_ms(LED_DELAY_MS);
-
-        //printf("1st worker is on core %d\n", portGET_CORE_ID());
     }
 }
 
@@ -66,9 +64,7 @@ void rpi2350_ha_core1_proc(__unused void *params)
     int counter = 0;
 
     while (true) 
-    {
-        //printf("2nd worker is on core %d\n", portGET_CORE_ID());
-        
+    {        
         struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX+1, PBUF_RAM);
         char *req = (char *)p->payload;
         memset(req, 0, BEACON_MSG_LEN_MAX+1);
@@ -82,20 +78,8 @@ void rpi2350_ha_core1_proc(__unused void *params)
             counter++;
         }
 
-        // Note in practice for this simple UDP transmitter,
-        // the end result for both background and poll is the same
-
-#if PICO_CYW43_ARCH_POLL
-        // if you are using pico_cyw43_arch_poll, then you must poll periodically from your
-        // main loop (not from a timer) to check for Wi-Fi driver or lwIP work that needs to be done.
         cyw43_arch_poll();
         sleep_ms(BEACON_INTERVAL_MS);
-#else
-        // if you are not using pico_cyw43_arch_poll, then WiFI driver and lwIP work
-        // is done via interrupt in the background. This sleep is just an example of some (blocking)
-        // work you might be doing.
-        sleep_ms(BEACON_INTERVAL_MS);
-#endif
     }
 
     cyw43_arch_deinit();
