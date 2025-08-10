@@ -5,9 +5,19 @@
 #include "rpi2350_ha_inf.h"
 #include "rpi2350_ha_priv.h"
 #include "rpi2350_ha_pub.h"
+#include "wifi_provisioning.h"  /* exclusively for attribute_handle_t */
 
-static device_state_t current_state = DEVICE_START_UP;
-static wifi_setting_t wifi_setting;
+typedef enum {
+    WIFI_SSID_HANDLE = ATT_CHARACTERISTIC_be3d7601_0ea0_4e96_82e0_89aa6a3dc19f_01_VALUE_HANDLE,
+    WIFI_PASSWORD_HANDLE = ATT_CHARACTERISTIC_be3d7602_0ea0_4e96_82e0_89aa6a3dc19f_01_VALUE_HANDLE,
+    IP_ADDRESS_HANDLE = ATT_CHARACTERISTIC_be3d7603_0ea0_4e96_82e0_89aa6a3dc19f_01_VALUE_HANDLE,
+    WIFI_SSID_USER_DESCRIPTION_HANDLE = ATT_CHARACTERISTIC_be3d7601_0ea0_4e96_82e0_89aa6a3dc19f_01_USER_DESCRIPTION_HANDLE,
+    WIFI_PASSWORD_USER_DESCRIPTION_HANDLE = ATT_CHARACTERISTIC_be3d7602_0ea0_4e96_82e0_89aa6a3dc19f_01_USER_DESCRIPTION_HANDLE,
+    IP_ADDRESS_USER_DESCRIPTION_HANDLE = ATT_CHARACTERISTIC_be3d7603_0ea0_4e96_82e0_89aa6a3dc19f_01_USER_DESCRIPTION_HANDLE,
+} attribute_handle_t;
+
+device_state_t current_state = DEVICE_START_UP;
+wifi_setting_t wifi_setting;
 static int le_notification_enabled;
 hci_con_handle_t con_handle;
 static btstack_packet_callback_registration_t hci_event_callback_registration;
@@ -533,7 +543,8 @@ static void sm_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
 /**
  * @brief Initializes the Bluetooth Low Energy (BLE) stack.
  */
-void rpi2350_ha_ble_init(void) {
+void rpi2350_ha_ble_init(void) 
+{
     l2cap_init();
     sm_init();
     att_server_init(profile_data, att_read_callback, att_write_callback);
