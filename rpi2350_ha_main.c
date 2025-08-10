@@ -39,6 +39,9 @@ void rpi2350_ha_init(void)
     hard_assert(retVal == PICO_OK);
 
     cyw43_arch_enable_sta_mode();
+    
+    retVal = cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000);
+    hard_assert(retVal == PICO_OK);
 }
 
 void rpi2350_ha_core0_proc(__unused void *params) 
@@ -57,10 +60,6 @@ void rpi2350_ha_core0_proc(__unused void *params)
 void rpi2350_ha_core1_proc(__unused void *params) 
 {
     struct udp_pcb* pcb = udp_new();
-    int retVal;
-
-    retVal = cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000);
-
     ip_addr_t addr;
     ipaddr_aton(BEACON_TARGET, &addr);
 
@@ -69,14 +68,6 @@ void rpi2350_ha_core1_proc(__unused void *params)
     while (true) 
     {
         //printf("2nd worker is on core %d\n", portGET_CORE_ID());
-        if (retVal) 
-        {
-            printf("failed to connect.\n");
-        } 
-        else 
-        {
-            printf("Connected.\n");
-        }
         
         struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX+1, PBUF_RAM);
         char *req = (char *)p->payload;
