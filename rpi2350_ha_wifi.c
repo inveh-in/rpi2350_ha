@@ -15,13 +15,15 @@
 /**
  * @brief Initializes the Wi-Fi functionality using the CYW43 driver.
  */
-void rpi2350_ha_wifi_init(void) 
+static void rpi2350_ha_wifi_init(void) 
 {
     /* nothing */
 }
 
 void rpi2350_ha_wifi_proc(__unused void *params) 
 {
+    rpi2350_ha_wifi_init();
+    
     struct udp_pcb* pcb = udp_new();
     ip_addr_t addr;
     ipaddr_aton(BEACON_TARGET, &addr);

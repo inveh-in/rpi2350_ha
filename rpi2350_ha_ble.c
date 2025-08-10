@@ -542,15 +542,21 @@ static void sm_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
     }
 }
 
+
 /**
- * @brief Initializes the wifi and Bluetooth Low Energy (BLE) stack.
+ * @brief Initializes the Wi-Fi functionality using the CYW43 driver.
  */
-void rpi2350_ha_ble_init(void) {
+static void wifi_init(void) {
     if (cyw43_arch_init()) {
         panic("failed to initialize cyw43_arch\n");
     }
     cyw43_arch_enable_sta_mode();
+}
 
+/**
+ * @brief Initializes the Bluetooth Low Energy (BLE) stack.
+ */
+static void bluetooth_init(void) {
     l2cap_init();
     sm_init();
     att_server_init(profile_data, att_read_callback, att_write_callback);
@@ -648,10 +654,13 @@ static void device_task(void) {
 
 void rpi2350_ha_ble_proc(__unused void *params)
 {
+    stdio_init_all();
+
     current_state = DEVICE_START_UP;
     printf("[MAIN] BLE Wi-Fi provisioning started\n");
 
-    rpi2350_ha_ble_init();
+    wifi_init();
+    bluetooth_init();
 
     process_event(EVENT_WIFI_CONFIGURED);
     while (true) {
