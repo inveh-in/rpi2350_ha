@@ -18,7 +18,7 @@
 
 /* Value for the UDP protocol */
 #define UDP_PORT 13400
-#define BEACON_MSG_LEN_MAX 127
+#define BEACON_MSG_LEN_MAX 4    /* actual length would be +1 */
 #define BEACON_TARGET "255.255.255.255"
 #define BEACON_INTERVAL_MS 1000
 
