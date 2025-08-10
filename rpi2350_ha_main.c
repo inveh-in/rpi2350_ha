@@ -29,14 +29,16 @@ void pico_set_led(bool led_on) {
 }
 
 // Perform initialisation
-int rpi2350_ha_init(void) 
+void rpi2350_ha_init(void) 
 {
     int retVal;
 
     stdio_init_all();
-    retVal = cyw43_arch_init();
 
-    return retVal;
+    retVal = cyw43_arch_init();
+    hard_assert(retVal == PICO_OK);
+
+    cyw43_arch_enable_sta_mode();
 }
 
 void rpi2350_ha_core0_proc(__unused void *params) 
@@ -48,25 +50,16 @@ void rpi2350_ha_core0_proc(__unused void *params)
         pico_set_led(false);
         busy_wait_ms(LED_DELAY_MS);
 
-        printf("1st worker is on core %d\n", portGET_CORE_ID());
+        //printf("1st worker is on core %d\n", portGET_CORE_ID());
     }
 }
 
 void rpi2350_ha_core1_proc(__unused void *params) 
 {
     struct udp_pcb* pcb = udp_new();
+    int retVal;
 
-    cyw43_arch_enable_sta_mode();
-
-    printf("Connecting to Wi-Fi...\n");
-    if (cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000)) 
-    {
-        printf("failed to connect.\n");
-    } 
-    else 
-    {
-        printf("Connected.\n");
-    }
+    retVal = cyw43_arch_wifi_connect_timeout_ms(WIFI_SSID, WIFI_PASSWORD, CYW43_AUTH_WPA2_AES_PSK, 30000);
 
     ip_addr_t addr;
     ipaddr_aton(BEACON_TARGET, &addr);
@@ -76,6 +69,14 @@ void rpi2350_ha_core1_proc(__unused void *params)
     while (true) 
     {
         //printf("2nd worker is on core %d\n", portGET_CORE_ID());
+        if (retVal) 
+        {
+            printf("failed to connect.\n");
+        } 
+        else 
+        {
+            printf("Connected.\n");
+        }
         
         struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX+1, PBUF_RAM);
         char *req = (char *)p->payload;
@@ -114,7 +115,7 @@ int main() {
     TaskHandle_t taskHandle_Core0;
     TaskHandle_t taskHandle_Core1;
 
-    hard_assert(rpi2350_ha_init() == PICO_OK);
+    rpi2350_ha_init();
 
     // we must bind the main task to core0
     xTaskCreate(rpi2350_ha_core0_proc, "MainThread", CORE0_TASK_STACK_SIZE, NULL, CORE0_TASK_PRIORITY, &taskHandle_Core0);
