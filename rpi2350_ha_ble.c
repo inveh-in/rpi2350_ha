@@ -560,26 +560,6 @@ static void wifi_init(void) {
 }
 
 /**
- * @brief Initializes the Bluetooth Low Energy (BLE) stack.
- */
-static void bluetooth_init(void) {
-    l2cap_init();
-    sm_init();
-    att_server_init(profile_data, att_read_callback, att_write_callback);
-    hci_event_callback_registration.callback = &ble_event_handler;
-    hci_add_event_handler(&hci_event_callback_registration);
-    att_server_register_packet_handler(ble_event_handler);
-
-    sm_event_callback_registration.callback = &sm_event_handler;
-    sm_add_event_handler(&sm_event_callback_registration);
-
-    sm_set_io_capabilities(IO_CAPABILITY_NO_INPUT_NO_OUTPUT);
-    sm_set_authentication_requirements(SM_AUTHREQ_NO_BONDING);
-
-    hci_power_control(HCI_POWER_ON);
-}
-
-/**
  * @brief Periodically checks the Wi-Fi link status and processes relevant events.
  */
 static void wifi_task(void) {
@@ -658,16 +638,30 @@ static void device_task(void) {
     }
 }
 
-void rpi2350_ha_ble_proc(__unused void *params)
+void rpi2350_ha_ble_init()
 {
     stdio_init_all();
 
+    l2cap_init();
+    sm_init();
+    att_server_init(profile_data, att_read_callback, att_write_callback);
+    hci_event_callback_registration.callback = &ble_event_handler;
+    hci_add_event_handler(&hci_event_callback_registration);
+    att_server_register_packet_handler(ble_event_handler);
+
+    sm_event_callback_registration.callback = &sm_event_handler;
+    sm_add_event_handler(&sm_event_callback_registration);
+
+    sm_set_io_capabilities(IO_CAPABILITY_NO_INPUT_NO_OUTPUT);
+    sm_set_authentication_requirements(SM_AUTHREQ_NO_BONDING);
+
+    hci_power_control(HCI_POWER_ON);
+
     current_state = DEVICE_START_UP;
-    printf("[MAIN] BLE Wi-Fi provisioning started\n");
+}
 
-    wifi_init();
-    bluetooth_init();
-
+void rpi2350_ha_ble_10ms()
+{
     process_event(EVENT_WIFI_CONFIGURED);
     while (true) {
         wifi_task();

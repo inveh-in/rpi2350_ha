@@ -1,5 +1,38 @@
 #ifndef _RPI2350_HA_PRIV_H
 #define _RPI2350_HA_PRIV_H
+
+/****************************************************************************************************/
+
+// Declaration for Timer
+struct timer_struct
+{
+  bool st_timer;
+  unsigned long t_startTime;
+};
+
+//Start timer
+void start_timer(timer_struct *timerX)
+{
+  if(timerX->st_timer == false)
+  {
+    timerX->t_startTime = millis();
+    timerX->st_timer = true; 
+  }
+}
+
+//Stop timer
+void stop_timer(timer_struct *timerX)
+{
+  timerX->t_startTime = 0;
+  timerX->st_timer = false;
+}
+
+//Get timer
+unsigned long get_timer(timer_struct *timerX)
+{
+  return(millis() - timerX->t_startTime);
+}
+/****************************************************************************************************/
 typedef enum {
     DEVICE_START_UP = 0,
     DEVICE_WIFI_LINK_DOWN,

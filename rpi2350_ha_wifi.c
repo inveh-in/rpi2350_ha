@@ -20,7 +20,7 @@ static void rpi2350_ha_wifi_init(void)
     /* nothing */
 }
 
-void rpi2350_ha_wifi_proc(__unused void *params) 
+void rpi2350_ha_wifi_10ms() 
 {
     rpi2350_ha_wifi_init();
     

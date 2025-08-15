@@ -14,14 +14,72 @@
 #define CORE0_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 #define CORE1_TASK_STACK_SIZE configMINIMAL_STACK_SIZE
 
+timer_struct timer_core0_10ms;
+timer_struct timer_core0_1000ms;
+
+timer_struct timer_core1_10ms;
+timer_struct timer_core1_1000ms;
+
 void rpi2350_ha_core0_proc(__unused void *params) 
 {
-    rpi2350_ha_ble_proc(params);
+    /* List the init proc here */
+    rpi2350_ha_ble_init();
+    
+    while(true)
+    {
+        /* 10ms task */        
+        start_timer(timer_core0_10ms);
+
+        if(get_timer(timer_core0_10ms) > 10)
+        {
+            /* List the 10ms proc here */
+            rpi2350_ha_ble_10ms();
+
+            stop_timer(timer_core0_10ms);
+        }
+
+        /* 1000ms task */        
+        start_timer(timer_core0_1000ms);
+
+        if(get_timer(timer_core0_1000ms) > 10)
+        {
+            /* List the 1000ms proc here */
+            //procxxx;
+
+            stop_timer(timer_core0_1000ms);
+        }
+    }
 }
 
 void rpi2350_ha_core1_proc(__unused void *params) 
 {
-    rpi2350_ha_wifi_proc(params);
+    /* List the init proc here */
+    rpi2350_ha_wifi_init();
+    
+    while(true)
+    {
+        /* 10ms task */        
+        start_timer(timer_core1_10ms);
+
+        if(get_timer(timer_core1_10ms) > 10)
+        {
+            /* List the 10ms proc here */
+            rpi2350_ha_wifi_10ms();
+
+            stop_timer(timer_core1_10ms);
+        }
+
+        /* 1000ms task */        
+        start_timer(timer_core1_1000ms);
+
+        if(get_timer(timer_core1_1000ms) > 10)
+        {
+            /* List the 1000ms proc here */
+            //procxxx;
+            
+            stop_timer(timer_core1_1000ms);
+        }
+    }
 }
 
 int main() {
