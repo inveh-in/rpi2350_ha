@@ -315,32 +315,56 @@ static void ble_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *pa
  * @return The number of bytes read.
  */
 static uint16_t att_read_callback(hci_con_handle_t connection_handle, uint16_t att_handle,
-                                  uint16_t offset, uint8_t *buffer, uint16_t buffer_size) {
+                                  uint16_t offset, uint8_t *buffer, uint16_t buffer_size) 
+{
+    uint16_t retVal;    
+    
     (void)connection_handle;
 
-    if (att_handle == WIFI_SSID_HANDLE) {
-        printf("[ATT] Read request for SSID: \"%s\"\n", wifi_setting.ssid);
-        return att_read_callback_handle_blob((const uint8_t *)&wifi_setting.ssid,
+    switch (att_handle)
+    {
+        case WIFI_SSID_HANDLE:
+        {
+            retVal = att_read_callback_handle_blob((const uint8_t *)&wifi_setting.ssid,
                                              strlen(wifi_setting.ssid), offset, buffer,
                                              buffer_size);
-    }
-    if (att_handle == IP_ADDRESS_HANDLE) {
-        printf("[ATT] Read request for IP address: %s\n", wifi_setting.ip_address);
-        return att_read_callback_handle_blob((const uint8_t *)&wifi_setting.ip_address,
+        }
+        break;
+
+        case IP_ADDRESS_HANDLE:
+        {
+            retVal = att_read_callback_handle_blob((const uint8_t *)&wifi_setting.ip_address,
                                              strlen(wifi_setting.ip_address), offset, buffer,
                                              buffer_size);
-    }
-    if (att_handle == WIFI_SSID_USER_DESCRIPTION_HANDLE) {
-        return att_read_callback_handle_blob((const uint8_t *)"SSID", 4, offset, buffer, buffer_size);
-    }
-    if (att_handle == WIFI_PASSWORD_USER_DESCRIPTION_HANDLE) {
-        return att_read_callback_handle_blob((const uint8_t *)"Password", 8, offset, buffer, buffer_size);
-    }
-    if (att_handle == IP_ADDRESS_USER_DESCRIPTION_HANDLE) {
-        return att_read_callback_handle_blob((const uint8_t *)"IP Address", 10, offset, buffer, buffer_size);
+        }
+        break;
+
+        case WIFI_SSID_USER_DESCRIPTION_HANDLE:
+        {
+            retVal = att_read_callback_handle_blob((const uint8_t *)"SSID", 4, offset, buffer, buffer_size);
+        }
+        break;
+
+        case WIFI_PASSWORD_USER_DESCRIPTION_HANDLE:
+        {
+            retVal = att_read_callback_handle_blob((const uint8_t *)"Password", 8, offset, buffer, buffer_size);
+        }
+        break;
+
+        case IP_ADDRESS_USER_DESCRIPTION_HANDLE:
+        {
+            retVal = att_read_callback_handle_blob((const uint8_t *)"IP Address", 10, offset, buffer, buffer_size);
+        }
+        break;
+
+        default:
+        {
+            retVal = 0;
+        }
+        break;
     }
 
-    return 0;
+    return retVal;
 }
 
 /**
