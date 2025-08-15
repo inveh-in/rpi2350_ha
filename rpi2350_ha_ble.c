@@ -548,17 +548,6 @@ static void sm_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
     }
 }
 
-
-/**
- * @brief Initializes the Wi-Fi functionality using the CYW43 driver.
- */
-static void wifi_init(void) {
-    if (cyw43_arch_init()) {
-        panic("failed to initialize cyw43_arch\n");
-    }
-    cyw43_arch_enable_sta_mode();
-}
-
 /**
  * @brief Periodically checks the Wi-Fi link status and processes relevant events.
  */
@@ -663,12 +652,12 @@ void rpi2350_ha_ble_init()
 void rpi2350_ha_ble_10ms()
 {
     process_event(EVENT_WIFI_CONFIGURED);
-    while (true) {
-        wifi_task();
-        device_task();
 
-        if (le_notification_enabled) {
-            att_server_request_can_send_now_event(con_handle);
-        }
+    wifi_task();
+    device_task();
+
+    if (le_notification_enabled) {
+        att_server_request_can_send_now_event(con_handle);
     }
+    
 }
