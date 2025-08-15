@@ -380,40 +380,45 @@ static uint16_t att_read_callback(hci_con_handle_t connection_handle, uint16_t a
  */
 static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_handle,
                               uint16_t transaction_mode, uint16_t offset, uint8_t *buffer,
-                              uint16_t buffer_size) {
+                              uint16_t buffer_size) 
+{
+    int retVal = ATT_ERROR_SUCCESS;
+
     (void)transaction_mode;
     (void)offset;
-    switch (att_handle) {
+
+    switch (att_handle) 
+    {
         case WIFI_SSID_HANDLE:
-            if (sizeof(wifi_setting.ssid) < buffer_size) {
-                printf("[ATT] WARN: Write message to SSID characteristic is too long\n");
-                return ATT_ERROR_INVALID_ATTRIBUTE_VALUE_LENGTH;
+        {
+            if (sizeof(wifi_setting.ssid) < buffer_size) 
+            {
+                retVal = ATT_ERROR_INVALID_ATTRIBUTE_VALUE_LENGTH;
             }
             memcpy(wifi_setting.ssid, buffer, buffer_size);
             wifi_setting.ssid[buffer_size] = '\0';
-            printf("[ATT] Write to SSID characteristic: \"%s\"\n", wifi_setting.ssid);
-            if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) {
-                process_event(EVENT_WIFI_CONNECT);
-            }
-            break;
+        }
+        break;
+
         case WIFI_PASSWORD_HANDLE:
-            if (sizeof(wifi_setting.password) < buffer_size) {
-                printf("[ATT] WARN: Write message to Password characteristic is too long\n");
-                return ATT_ERROR_INVALID_ATTRIBUTE_VALUE_LENGTH;
+        {
+            if (sizeof(wifi_setting.password) < buffer_size) 
+            {
+                retVal = ATT_ERROR_INVALID_ATTRIBUTE_VALUE_LENGTH;
             }
             memcpy(wifi_setting.password, buffer, buffer_size);
             wifi_setting.password[buffer_size] = '\0';
-            printf("[ATT] Write to Password characteristic: ");
-            for (size_t i = 0; i < strlen(wifi_setting.password); i++) printf("*");
-            printf("\n");
-            if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) {
-                process_event(EVENT_WIFI_CONNECT);
-            }
-            break;
+        }
+        break;
+
         default:
-            break;
+        {
+            /* do nothing */
+        }
+        break;
     }
-    return ATT_ERROR_SUCCESS;
+
+    return retVal;
 }
 
 /**
@@ -657,6 +662,7 @@ void rpi2350_ha_ble_init()
 
     l2cap_init();
     sm_init();
+    
     att_server_init(profile_data, att_read_callback, att_write_callback);
     hci_event_callback_registration.callback = &ble_event_handler;
     hci_add_event_handler(&hci_event_callback_registration);
