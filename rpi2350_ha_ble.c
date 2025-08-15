@@ -244,63 +244,77 @@ static void process_event(device_event_t event) {
  * @param size The size of the received packet data.
  */
 static void ble_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet,
-                              uint16_t size) {
+                              uint16_t size) 
+{
+    bd_addr_t local_addr;
+    uint8_t event_type = hci_event_packet_get_type(packet);
+
     (void)size;
     (void)channel;
-    bd_addr_t local_addr;
-    if (packet_type != HCI_EVENT_PACKET)
-        return;
 
-    uint8_t event_type = hci_event_packet_get_type(packet);
-    switch (event_type) {
-        case BTSTACK_EVENT_STATE:
-            if (btstack_event_state_get_state(packet) != HCI_STATE_WORKING)
-                return;
-            gap_local_bd_addr(local_addr);
-            printf("[BLE] BTstack up and running on %s.\n", bd_addr_to_str(local_addr));
+    if (packet_type == HCI_EVENT_PACKET)
+    {
+        switch (event_type) 
+        {
+            case BTSTACK_EVENT_STATE:
+            {
+                if (btstack_event_state_get_state(packet) == HCI_STATE_WORKING)
+                {
+                    gap_local_bd_addr(local_addr);
 
-            // setup advertisements
-            uint16_t adv_int_min = 800;
-            uint16_t adv_int_max = 800;
-            uint8_t adv_type = 0;
-            bd_addr_t null_addr;
-            memset(null_addr, 0, 6);
-            gap_advertisements_set_params(adv_int_min, adv_int_max, adv_type, 0, null_addr, 0x07,
-                                          0x00);
-            assert(adv_data_len <= 31);  // ble limitation
+                    // setup advertisements
+                    uint16_t adv_int_min = 800;
+                    uint16_t adv_int_max = 800;
+                    uint8_t adv_type = 0;
+                    bd_addr_t null_addr;
+                    memset(null_addr, 0, 6);
+                    gap_advertisements_set_params(adv_int_min, adv_int_max, adv_type, 0, null_addr, 0x07,
+                                                0x00);
+                    assert(adv_data_len <= 31);  // ble limitation
 
-            gap_advertisements_set_data(adv_data_len, (uint8_t *)adv_data);
-            gap_advertisements_enable(1);
-
-            break;
-        case HCI_EVENT_LE_META:
-            uint8_t subevent = hci_event_le_meta_get_subevent_code(packet);
-            if (subevent == HCI_SUBEVENT_LE_CONNECTION_COMPLETE) {
-                con_handle = hci_subevent_le_connection_complete_get_connection_handle(packet);
-                printf("[BLE] Connection established, handle: 0x%04x\n", con_handle);
+                    gap_advertisements_set_data(adv_data_len, (uint8_t *)adv_data);
+                    gap_advertisements_enable(1);
+                }
             }
             break;
-        case HCI_EVENT_DISCONNECTION_COMPLETE:
-            con_handle = HCI_CON_HANDLE_INVALID;
-            le_notification_enabled = 0;
-            printf("[BLE] Disconnected, handle: 0x%04x\n",
-                   hci_event_disconnection_complete_get_connection_handle(packet));
-            break;
-        case HCI_EVENT_GATTSERVICE_META:
-            printf("ble_event_handler write callback\n");
-            break;
-        case ATT_EVENT_CAN_SEND_NOW:
-            if (con_handle != HCI_CON_HANDLE_INVALID) {
-                att_server_notify(con_handle, WIFI_SSID_HANDLE, (uint8_t *)&wifi_setting.ssid,
-                                  strlen(wifi_setting.ssid));
-                att_server_notify(con_handle, IP_ADDRESS_HANDLE,
-                                  (uint8_t *)&wifi_setting.ip_address,
-                                  strlen(wifi_setting.ip_address));
-                printf("[ATT] Can send notification now\n");
+            
+            case HCI_EVENT_LE_META:
+            {
+                uint8_t subevent = hci_event_le_meta_get_subevent_code(packet);
+                if (subevent == HCI_SUBEVENT_LE_CONNECTION_COMPLETE) 
+                {
+                    con_handle = hci_subevent_le_connection_complete_get_connection_handle(packet);
+                }
             }
             break;
-        default:
+
+            case HCI_EVENT_DISCONNECTION_COMPLETE:
+            {
+                con_handle = HCI_CON_HANDLE_INVALID;
+                le_notification_enabled = 0;
+            }
             break;
+
+            case ATT_EVENT_CAN_SEND_NOW:
+            {
+                if (con_handle != HCI_CON_HANDLE_INVALID) 
+                {
+                    att_server_notify(con_handle, WIFI_SSID_HANDLE, (uint8_t *)&wifi_setting.ssid,
+                                    strlen(wifi_setting.ssid));
+                    att_server_notify(con_handle, IP_ADDRESS_HANDLE,
+                                    (uint8_t *)&wifi_setting.ip_address,
+                                    strlen(wifi_setting.ip_address));
+                }
+            }
+            break;
+
+            default:
+                break;
+        }
+    }
+    else
+    {
+        /* do nothing */
     }
 }
 
@@ -662,7 +676,7 @@ void rpi2350_ha_ble_init()
 
     l2cap_init();
     sm_init();
-    
+
     att_server_init(profile_data, att_read_callback, att_write_callback);
     hci_event_callback_registration.callback = &ble_event_handler;
     hci_add_event_handler(&hci_event_callback_registration);
@@ -686,7 +700,8 @@ void rpi2350_ha_ble_10ms()
     wifi_task();
     device_task();
 
-    if (le_notification_enabled) {
+    if (le_notification_enabled) 
+    {
         att_server_request_can_send_now_event(con_handle);
     }
     
