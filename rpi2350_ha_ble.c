@@ -40,105 +40,6 @@ static uint8_t adv_data[] = {
 static const uint8_t adv_data_len = sizeof(adv_data);
 
 /**
- * @brief Converts a device state enum to a human-readable string.
- *
- * @param state The device state to convert.
- * @return A string representation of the device state.
- */
-static const char *device_state_string(device_state_t state) {
-    if (state == DEVICE_START_UP)
-        return "DEVICE_START_UP";
-    if (state == DEVICE_WIFI_LINK_TO_UP)
-        return "DEVICE_WIFI_LINK_TO_UP";
-    if (state == DEVICE_WIFI_LINK_UP)
-        return "DEVICE_WIFI_LINK_UP";
-    if (state == DEVICE_WIFI_LINK_CONNECTED)
-        return "DEVICE_WIFI_LINK_CONNECTED";
-    if (state == DEVICE_WIFI_LINK_DOWN)
-        return "DEVICE_WIFI_LINK_DOWN";
-    if (state == DEVICE_RUNNING)
-        return "DEVICE_RUNNING";
-    if (state == DEVICE_ERROR)
-        return "DEVICE_ERROR";
-    return "UNKNOWN";
-}
-
-/**
- * @brief Converts a device event enum to a human-readable string.
- *
- * @param event The device event to convert.
- * @return A string representation of the device event.
- */
-static const char *device_event_string(device_event_t event) {
-    if (event == EVENT_NONE)
-        return "EVENT_NONE";
-    if (event == EVENT_WIFI_CONFIGURED)
-        return "EVENT_WIFI_CONFIGURED";
-    if (event == EVENT_WIFI_CONNECT)
-        return "EVENT_WIFI_CONNECT";
-    if (event == EVENT_WIFI_CONNECTED)
-        return "EVENT_WIFI_CONNECTED";
-    if (event == EVENT_WIFI_ERROR)
-        return "EVENT_WIFI_ERROR";
-    if (event == EVENT_IP_ACQUIRED)
-        return "EVENT_IP_ACQUIRED";
-    if (event == EVENT_WIFI_DISCONNECTED)
-        return "EVENT_WIFI_DISCONNECTED";
-    if (event == EVENT_ERROR_OCCURED)
-        return "EVENT_ERROR_OCCURED";
-    return "UNKNOWN";
-}
-
-/**
- * @brief Defines the state transition logic based on the current state and event.
- *
- * @param state The current device state.
- * @param event The event that occurred.
- * @return The new device state after the transition.
- */
-static device_state_t state_transition(device_state_t state, device_event_t event) {
-    switch (state) {
-        case DEVICE_START_UP:
-            if (event == EVENT_WIFI_CONFIGURED)
-                return DEVICE_WIFI_LINK_DOWN;
-            break;
-        case DEVICE_WIFI_LINK_DOWN:
-            if (event == EVENT_WIFI_CONNECT)
-                return DEVICE_WIFI_LINK_TO_UP;
-            break;
-        case DEVICE_WIFI_LINK_TO_UP:
-            if (event == EVENT_WIFI_CONNECTED)
-                return DEVICE_WIFI_LINK_UP;
-            if (event == EVENT_WIFI_ERROR)
-                return DEVICE_WIFI_LINK_DOWN;
-            break;
-        case DEVICE_WIFI_LINK_UP:
-            if (event == EVENT_IP_ACQUIRED)
-                return DEVICE_WIFI_LINK_CONNECTED;
-            if (event == EVENT_WIFI_CONNECT)
-                return DEVICE_WIFI_LINK_DOWN;
-            if (event == EVENT_WIFI_ERROR)
-                return DEVICE_WIFI_LINK_DOWN;
-            break;
-        case DEVICE_WIFI_LINK_CONNECTED:
-            if (event == EVENT_WIFI_CONNECTED)
-                return DEVICE_RUNNING;
-            if (event == EVENT_WIFI_DISCONNECTED)
-                return DEVICE_WIFI_LINK_DOWN;
-            break;
-        case DEVICE_RUNNING:
-            if (event == EVENT_WIFI_CONNECT)
-                return DEVICE_WIFI_LINK_DOWN;
-            if (event == EVENT_WIFI_DISCONNECTED)
-                return DEVICE_WIFI_LINK_DOWN;
-            break;
-        default:
-            break;
-    }
-    return state;
-}
-
-/**
  * @brief Callback function to notify the connected BLE device about the IP address.
  *
  * @param context Pointer to the notify_string_t structure containing notification data.
@@ -148,90 +49,6 @@ static void notify_ip_address_callback(void *context) {
     int err = att_server_notify(*notify->con_handle, IP_ADDRESS_HANDLE, notify->data, notify->len);
     if (err) {
         printf("[ATT] Notification error=%d\n", err);
-    }
-}
-
-/**
- * @brief Executes actions upon entering a specific device state.
- *
- * @param state The device state being entered.
- */
-static void state_entry_action(device_state_t state) {
-    switch (state) {
-        case DEVICE_WIFI_LINK_TO_UP: {
-            printf(
-                "[STATE] Entering: DEVICE_WIFI_LINK_TO_UP, attempting Wi-Fi connection to SSID: "
-                "%s\n",
-                wifi_setting.ssid);
-            rpi2350_wifiEna_st = 0;
-            cyw43_arch_enable_sta_mode();
-            int rc = cyw43_wifi_leave(&cyw43_state, CYW43_ITF_STA);
-            rc = cyw43_arch_wifi_connect_async(wifi_setting.ssid, wifi_setting.password,
-                                               CYW43_AUTH_WPA2_AES_PSK);
-            if (rc != 0) {
-                printf("[WIFI] Wi-Fi connect async failed, error code: %d\n", rc);
-                process_event(EVENT_ERROR_OCCURED);
-            }
-            break;
-        }
-        case DEVICE_WIFI_LINK_UP:
-            printf("[STATE] Entering: DEVICE_WIFI_LINK_UP, waiting for IP address...\n");
-            rpi2350_wifiEna_st = 0;
-            break;
-        case DEVICE_WIFI_LINK_CONNECTED: {
-            printf("[STATE] Entering: DEVICE_WIFI_LINK_CONNECTED, Wi-Fi connected\n");
-            rpi2350_wifiEna_st = 0;
-            if (con_handle != HCI_CON_HANDLE_INVALID) {
-                notify_string_t notify;
-                notify.data = wifi_setting.ip_address;
-                notify.len = strlen(wifi_setting.ip_address);
-                notify.con_handle = &con_handle;
-                btstack_context_callback_registration_t context_registration;
-                context_registration.callback = &notify_ip_address_callback;
-                context_registration.context = &notify;
-                att_server_request_to_send_notification(&context_registration, con_handle);
-            }
-            break;
-        }
-        case DEVICE_WIFI_LINK_DOWN: {
-            printf("[STATE] Entering: DEVICE_WIFI_LINK_DOWN\n");
-            rpi2350_wifiEna_st = 0;
-            cyw43_wifi_leave(&cyw43_state, CYW43_ITF_STA);
-            cyw43_cb_tcpip_deinit(&cyw43_state, 0);
-            cyw43_cb_tcpip_deinit(&cyw43_state, 1);
-            cyw43_cb_tcpip_init(&cyw43_state, 0);
-            cyw43_cb_tcpip_init(&cyw43_state, 1);
-            wifi_setting.ip_address[0] = '\0';
-
-            if (con_handle != HCI_CON_HANDLE_INVALID) {
-                att_server_notify(con_handle, IP_ADDRESS_HANDLE,
-                                  (uint8_t *)&wifi_setting.ip_address,
-                                  strlen(wifi_setting.ip_address));
-            }
-            break;
-        }
-        case DEVICE_RUNNING:
-            printf("[STATE] Entering: DEVICE_RUNNING, device is fully operational\n");
-            rpi2350_wifiEna_st = 1;
-            break;
-        default:
-            break;
-    }
-}
-
-/**
- * @brief Processes a device event by performing a state transition and executing entry actions.
- *
- * @param event The device event to process.
- */
-static void process_event(device_event_t event) {
-    device_state_t new_state = state_transition(current_state, event);
-    printf("[EVENT] Processing: %s, current state: %s -> new state: %s\n",
-           device_event_string(event), device_state_string(current_state),
-           device_state_string(new_state));
-    if (new_state != current_state) {
-        current_state = new_state;
-        state_entry_action(current_state);
     }
 }
 
@@ -591,55 +408,6 @@ static void sm_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
     }
 }
 
-/**
- * @brief Periodically checks the Wi-Fi link status and processes relevant events.
- */
-static void wifi_task(void) {
-    int status;
-
-    switch (current_state) {
-        case DEVICE_WIFI_LINK_TO_UP:
-            status = cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA);
-            printf("[WIFI] Link status: %d\n", status);
-            if (status == CYW43_LINK_JOIN) {
-                process_event(EVENT_WIFI_CONNECTED);
-            } else if (status < 0) {
-                process_event(EVENT_WIFI_ERROR);
-            }
-            break;
-        case DEVICE_WIFI_LINK_UP:
-            status = cyw43_wifi_link_status(&cyw43_state, CYW43_ITF_STA);
-            if (status == CYW43_LINK_NONET) {
-                printf("[WIFI] Error: No matching SSID found\n");
-                wifi_setting.ssid[0] = '\0';
-                process_event(EVENT_WIFI_ERROR);
-            } else if (status == CYW43_LINK_BADAUTH) {
-                printf("[WIFI] Error: Authentication failure\n");
-                wifi_setting.password[0] = '\0';
-                process_event(EVENT_WIFI_ERROR);
-            }
-
-            if (status == CYW43_LINK_JOIN && (*(uint32_t *)&cyw43_state.netif[0].ip_addr) != 0) {
-                char *ip_address = ip4addr_ntoa(&cyw43_state.netif[0].ip_addr);
-                strcpy(wifi_setting.ip_address, ip_address);
-                printf("[WIFI] Acquired IP address: %s\n", wifi_setting.ip_address);
-                wifi_setting.link_status = 1;
-
-                process_event(EVENT_IP_ACQUIRED);
-            }
-            break;
-        case DEVICE_WIFI_LINK_CONNECTED:
-            process_event(EVENT_WIFI_CONNECTED);
-            break;
-        case DEVICE_WIFI_LINK_DOWN:
-            if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) {
-                process_event(EVENT_WIFI_CONNECT);
-            }
-            break;
-        default:
-            break;
-    }
-}
 
 #define LED_BLINK_INTERVAL_US 500000
 
@@ -701,7 +469,6 @@ void rpi2350_ha_ble_init()
 
 void rpi2350_ha_ble_10ms()
 {
-    //wifi_task();
     device_task();
 
     if (le_notification_enabled) 

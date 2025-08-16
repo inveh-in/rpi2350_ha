@@ -117,8 +117,8 @@ int main() {
     vTaskCoreAffinitySet(taskHandle_Core0, ( 1 << 0 ));
 
     // we must bind the main task to core1
-    //xTaskCreate(rpi2350_ha_core1_proc, "core1 MainThread", CORE1_TASK_STACK_SIZE, NULL, CORE1_TASK_PRIORITY, &taskHandle_Core1);
-    //vTaskCoreAffinitySet(taskHandle_Core1, ( 1 << 1 ));
+    xTaskCreate(rpi2350_ha_core1_proc, "core1 MainThread", CORE1_TASK_STACK_SIZE, NULL, CORE1_TASK_PRIORITY, &taskHandle_Core1);
+    vTaskCoreAffinitySet(taskHandle_Core1, ( 1 << 1 ));
 
     /* Start the tasks and timer running. */
     vTaskStartScheduler();
