@@ -20,6 +20,31 @@ timer_struct timer_core0_1000ms;
 timer_struct timer_core1_10ms;
 timer_struct timer_core1_1000ms;
 
+/****************************************************************************************************/
+//Start timer
+void start_timer(timer_struct *timerX)
+{
+  if(timerX->st_timer == false)
+  {
+    timerX->t_startTime = pdTICKS_TO_MS(xTaskGetTickCount());
+    timerX->st_timer = true; 
+  }
+}
+
+//Stop timer
+void stop_timer(timer_struct *timerX)
+{
+  timerX->t_startTime = 0;
+  timerX->st_timer = false;
+}
+
+//Get timer
+unsigned long get_timer(timer_struct *timerX)
+{
+  return(pdTICKS_TO_MS(xTaskGetTickCount()) - timerX->t_startTime);
+}
+/****************************************************************************************************/
+
 void rpi2350_ha_core0_proc(__unused void *params) 
 {
     /* List the init proc here */
@@ -28,25 +53,25 @@ void rpi2350_ha_core0_proc(__unused void *params)
     while(true)
     {
         /* 10ms task */        
-        start_timer(timer_core0_10ms);
+        start_timer(&timer_core0_10ms);
 
-        if(get_timer(timer_core0_10ms) > 10)
+        if(get_timer(&timer_core0_10ms) > 10)
         {
             /* List the 10ms proc here */
             rpi2350_ha_ble_10ms();
 
-            stop_timer(timer_core0_10ms);
+            stop_timer(&timer_core0_10ms);
         }
 
         /* 1000ms task */        
-        start_timer(timer_core0_1000ms);
+        start_timer(&timer_core0_1000ms);
 
-        if(get_timer(timer_core0_1000ms) > 10)
+        if(get_timer(&timer_core0_1000ms) > 10)
         {
             /* List the 1000ms proc here */
             //procxxx;
 
-            stop_timer(timer_core0_1000ms);
+            stop_timer(&timer_core0_1000ms);
         }
     }
 }
@@ -59,25 +84,25 @@ void rpi2350_ha_core1_proc(__unused void *params)
     while(true)
     {
         /* 10ms task */        
-        start_timer(timer_core1_10ms);
+        start_timer(&timer_core1_10ms);
 
-        if(get_timer(timer_core1_10ms) > 10)
+        if(get_timer(&timer_core1_10ms) > 10)
         {
             /* List the 10ms proc here */
             rpi2350_ha_wifi_10ms();
 
-            stop_timer(timer_core1_10ms);
+            stop_timer(&timer_core1_10ms);
         }
 
         /* 1000ms task */        
-        start_timer(timer_core1_1000ms);
+        start_timer(&timer_core1_1000ms);
 
-        if(get_timer(timer_core1_1000ms) > 10)
+        if(get_timer(&timer_core1_1000ms) > 10)
         {
             /* List the 1000ms proc here */
             //procxxx;
             
-            stop_timer(timer_core1_1000ms);
+            stop_timer(&timer_core1_1000ms);
         }
     }
 }

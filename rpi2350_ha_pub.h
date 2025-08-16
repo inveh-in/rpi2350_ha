@@ -3,7 +3,9 @@
 
 extern int rpi2350_wifiEna_st;
 
-extern void rpi2350_ha_ble_proc(__unused void *params);
-extern void rpi2350_ha_wifi_proc(__unused void *params);
+extern void rpi2350_ha_ble_init();
+extern void rpi2350_ha_ble_10ms();
+extern void rpi2350_ha_wifi_init();
+extern void rpi2350_ha_wifi_10ms();
 
 #endif /* _RPI2350_HA_PUB_H */

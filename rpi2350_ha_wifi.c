@@ -15,7 +15,7 @@
 /**
  * @brief Initializes the Wi-Fi functionality using the CYW43 driver.
  */
-static void rpi2350_ha_wifi_init(void) 
+void rpi2350_ha_wifi_init(void) 
 {
     if (cyw43_arch_init()) {
         panic("failed to initialize cyw43_arch\n");
@@ -24,9 +24,7 @@ static void rpi2350_ha_wifi_init(void)
 }
 
 void rpi2350_ha_wifi_10ms() 
-{
-    rpi2350_ha_wifi_init();
-    
+{    
     struct udp_pcb* pcb = udp_new();
     ip_addr_t addr;
     ipaddr_aton(BEACON_TARGET, &addr);
