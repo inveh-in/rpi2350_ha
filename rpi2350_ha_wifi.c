@@ -17,10 +17,6 @@
  */
 void rpi2350_ha_wifi_init(void) 
 {
-    if (cyw43_arch_init()) 
-    {
-        panic("failed to initialize cyw43_arch\n");
-    }
     cyw43_arch_enable_sta_mode();
 }
 

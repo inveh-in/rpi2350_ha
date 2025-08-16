@@ -675,6 +675,11 @@ void rpi2350_ha_ble_init()
 {
     stdio_init_all();
 
+    if (cyw43_arch_init()) 
+    {
+        panic("failed to initialize cyw43_arch\n");
+    }
+
     l2cap_init();
     sm_init();
 
@@ -690,6 +695,8 @@ void rpi2350_ha_ble_init()
     sm_set_authentication_requirements(SM_AUTHREQ_NO_BONDING);
 
     hci_power_control(HCI_POWER_ON);
+
+    current_state = DEVICE_WIFI_LINK_DOWN;
 }
 
 void rpi2350_ha_ble_10ms()
