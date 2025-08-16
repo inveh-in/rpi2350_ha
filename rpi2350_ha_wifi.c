@@ -17,7 +17,8 @@
  */
 void rpi2350_ha_wifi_init(void) 
 {
-    if (cyw43_arch_init()) {
+    if (cyw43_arch_init()) 
+    {
         panic("failed to initialize cyw43_arch\n");
     }
     cyw43_arch_enable_sta_mode();
@@ -30,28 +31,25 @@ void rpi2350_ha_wifi_10ms()
     ipaddr_aton(BEACON_TARGET, &addr);
 
     int counter = 0;
-
-    while (true) 
-    {                
-        if(rpi2350_wifiEna_st)
-        {
-            struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX+1, PBUF_RAM);
-            char *req = (char *)p->payload;
-            memset(req, 0, BEACON_MSG_LEN_MAX+1);
-            snprintf(req, BEACON_MSG_LEN_MAX, "%d\n", counter);
-            err_t er = udp_sendto(pcb, p, &addr, UDP_PORT);
-            pbuf_free(p);
-            if (er != ERR_OK) {
-                printf("Failed to send UDP packet! error=%d\n", er);
-            } else {
-                printf("Sent packet %d\n", counter);
-                counter++;
-            }
-
-            cyw43_arch_poll();
-            sleep_ms(BEACON_INTERVAL_MS);
+               
+    if(rpi2350_wifiEna_st)
+    {
+        struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX+1, PBUF_RAM);
+        char *req = (char *)p->payload;
+        memset(req, 0, BEACON_MSG_LEN_MAX+1);
+        snprintf(req, BEACON_MSG_LEN_MAX, "%d\n", counter);
+        err_t er = udp_sendto(pcb, p, &addr, UDP_PORT);
+        pbuf_free(p);
+        if (er != ERR_OK) {
+            printf("Failed to send UDP packet! error=%d\n", er);
+        } else {
+            printf("Sent packet %d\n", counter);
+            counter++;
         }
+
+        cyw43_arch_poll();
     }
 
-    cyw43_arch_deinit();
+    /* This situation be never arrived
+     * cyw43_arch_deinit(); */
 }

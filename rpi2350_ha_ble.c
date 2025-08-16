@@ -655,7 +655,8 @@ static void device_task(void) {
         case DEVICE_WIFI_LINK_DOWN:
         case DEVICE_WIFI_LINK_TO_UP:
         case DEVICE_WIFI_LINK_UP:
-            if (time_us_64() - last_toggle_time > LED_BLINK_INTERVAL_US) {
+            if (time_us_64() - last_toggle_time > LED_BLINK_INTERVAL_US)
+            {
                 cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, !led_state);
                 last_toggle_time = time_us_64();
             }
@@ -689,15 +690,11 @@ void rpi2350_ha_ble_init()
     sm_set_authentication_requirements(SM_AUTHREQ_NO_BONDING);
 
     hci_power_control(HCI_POWER_ON);
-
-    current_state = DEVICE_START_UP;
 }
 
 void rpi2350_ha_ble_10ms()
 {
-    process_event(EVENT_WIFI_CONFIGURED);
-
-    wifi_task();
+    //wifi_task();
     device_task();
 
     if (le_notification_enabled) 
