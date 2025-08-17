@@ -2,11 +2,10 @@
  * Copyright (c) inveh.
  *
  */
-#include "rpi2350_ha_inf.h"
-#include "rpi2350_ha_priv.h"
-#include "rpi2350_ha_pub.h"
-#include "wifi_provisioning.h"  /* exclusively for attribute_handle_t */
-
+#include "rpi2350_ha_ble_inf.h"
+#include "rpi2350_ha_ble_priv.h"
+#include "rpi2350_ha_ble_pub.h"
+#include "rpi2350_ha_wifi_provisioning.h"  /* exclusively for attribute_handle_t */
 typedef enum {
     WIFI_SSID_HANDLE = ATT_CHARACTERISTIC_be3d7601_0ea0_4e96_82e0_89aa6a3dc19f_01_VALUE_HANDLE,
     WIFI_PASSWORD_HANDLE = ATT_CHARACTERISTIC_be3d7602_0ea0_4e96_82e0_89aa6a3dc19f_01_VALUE_HANDLE,

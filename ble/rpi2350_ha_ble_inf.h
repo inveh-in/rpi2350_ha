@@ -3,8 +3,8 @@
  *
  */
 
-#ifndef _RPI2350_HA_INF_H
-#define _RPI2350_HA_INF_H
+#ifndef _RPI2350_HA_BLE_INF_H
+#define _RPI2350_HA_BLE_INF_H
 
 #include <stdio.h>
 
@@ -16,12 +16,8 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* for LwIP */
-#include "lwip/pbuf.h"
-#include "lwip/udp.h"
-
 /* for BLE */
 #include "btstack.h"
 #include "pico/btstack_cyw43.h"
 
-#endif /* _RPI2350_HA_INF_H */
+#endif /* _RPI2350_HA_BLE_INF_H */

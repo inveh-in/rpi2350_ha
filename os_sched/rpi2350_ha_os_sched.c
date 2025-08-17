@@ -2,9 +2,9 @@
  * Copyright (c) inveh.
  *
  */
-#include "rpi2350_ha_inf.h"
-#include "rpi2350_ha_priv.h"
-#include "rpi2350_ha_pub.h"
+#include "rpi2350_ha_os_sched_inf.h"
+#include "rpi2350_ha_os_sched_priv.h"
+#include "rpi2350_ha_os_sched_pub.h"
 
 // Priorities of our threads - higher numbers are higher priority
 #define CORE0_TASK_PRIORITY    ( tskIDLE_PRIORITY + 4UL )

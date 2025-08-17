@@ -22,7 +22,7 @@ pico_sdk_init()
 # rest of your project
 add_executable(rpi2350_ha
     ble/rpi2350_ha_ble.c
-    os/rpi2350_ha_main.c
+    os_sched/rpi2350_ha_os_sched.c
     wifi/rpi2350_ha_wifi.c
 )
 
@@ -32,7 +32,7 @@ pico_btstack_make_gatt_header(rpi2350_ha
 # Add include directories
 target_include_directories(rpi2350_ha
 	PRIVATE ${CMAKE_CURRENT_LIST_DIR}/ble
-	PRIVATE ${CMAKE_CURRENT_LIST_DIR}/os
+	PRIVATE ${CMAKE_CURRENT_LIST_DIR}/os_sched
     PRIVATE ${CMAKE_CURRENT_LIST_DIR}/wifi
     PUBLIC ${FREERTOS_KERNEL_PATH}/include
 )
