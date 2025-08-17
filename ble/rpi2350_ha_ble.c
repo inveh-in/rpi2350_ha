@@ -22,9 +22,7 @@ static int le_notification_enabled;
 hci_con_handle_t con_handle;
 static btstack_packet_callback_registration_t hci_event_callback_registration;
 static btstack_packet_callback_registration_t sm_event_callback_registration;
-int rpi2350_wifiEna_st = 0;
-
-static void process_event(device_event_t event);
+int rpi2350_ble_st = 0;
 
 #define APP_AD_FLAGS 0x06
 
@@ -228,6 +226,11 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
             }
             memcpy(wifi_setting.ssid, buffer, buffer_size);
             wifi_setting.ssid[buffer_size] = '\0';
+
+            if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) 
+            {
+                process_event(EVENT_WIFI_CONNECT);
+            }
         }
         break;
 
@@ -239,6 +242,11 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
             }
             memcpy(wifi_setting.password, buffer, buffer_size);
             wifi_setting.password[buffer_size] = '\0';
+
+            if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) 
+            {
+                process_event(EVENT_WIFI_CONNECT);
+            }
         }
         break;
 

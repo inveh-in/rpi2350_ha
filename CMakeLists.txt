@@ -21,21 +21,25 @@ pico_sdk_init()
 
 # rest of your project
 add_executable(rpi2350_ha
-    rpi2350_ha_ble.c
-    rpi2350_ha_wifi.c
-    rpi2350_ha_main.c
+    ble/rpi2350_ha_ble.c
+    os/rpi2350_ha_main.c
+    wifi/rpi2350_ha_wifi.c
 )
 
-pico_btstack_make_gatt_header(rpi2350_ha PRIVATE "${CMAKE_CURRENT_LIST_DIR}/wifi_provisioning.gatt")
+pico_btstack_make_gatt_header(rpi2350_ha
+    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/wifi/wifi_provisioning.gatt")
 
 # Add include directories
 target_include_directories(rpi2350_ha
-	PRIVATE ${CMAKE_CURRENT_LIST_DIR}
+	PRIVATE ${CMAKE_CURRENT_LIST_DIR}/ble
+	PRIVATE ${CMAKE_CURRENT_LIST_DIR}/os
+    PRIVATE ${CMAKE_CURRENT_LIST_DIR}/wifi
     PUBLIC ${FREERTOS_KERNEL_PATH}/include
 )
 
 # Add pico_stdlib library which aggregates commonly used features
-target_link_libraries(rpi2350_ha FreeRTOS-Kernel 
+target_link_libraries(rpi2350_ha 
+FreeRTOS-Kernel 
 FreeRTOS-Kernel-Heap4 
 pico_stdlib
 pico_cyw43_arch_lwip_threadsafe_background

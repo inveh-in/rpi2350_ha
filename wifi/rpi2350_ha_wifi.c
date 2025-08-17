@@ -17,7 +17,7 @@
  *
  * @param state The device state being entered.
  */
-static void state_entry_action(device_state_t state) {
+static void state_entry_action() {
     switch (state) {
         case DEVICE_WIFI_LINK_TO_UP: {
             printf(
