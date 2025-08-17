@@ -62,8 +62,6 @@ void rpi2350_ha_wifi_1000ms()
             printf("Sent packet %d\n", counter);
             counter++;
         }
-
-        cyw43_arch_poll();
     }
 
     /* This situation be never arrived
