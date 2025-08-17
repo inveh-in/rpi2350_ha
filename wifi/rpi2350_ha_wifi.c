@@ -25,7 +25,7 @@ void rpi2350_ha_wifi_init(void)
     rpi2350_ha_wifi_st = 0;
 }
 
-void rpi2350_ha_wifi_10ms() 
+void rpi2350_ha_wifi_1000ms() 
 {    
     int rc;
 
