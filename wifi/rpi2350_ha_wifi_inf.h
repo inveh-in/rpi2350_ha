@@ -20,4 +20,6 @@
 #include "lwip/pbuf.h"
 #include "lwip/udp.h"
 
+#include "rpi2350_ha_ble_pub.h"
+
 #endif /* _RPI2350_HA_WIFI_INF_H */

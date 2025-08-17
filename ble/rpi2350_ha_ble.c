@@ -470,6 +470,18 @@ void rpi2350_ha_ble_10ms()
 {
     device_task();
 
+    if (rpi2350_ha_wifi_st != 0) 
+    {
+        notify_string_t notify;
+        notify.data = wifi_setting.ip_address;
+        notify.len = strlen(wifi_setting.ip_address);
+        notify.con_handle = &con_handle;
+        btstack_context_callback_registration_t context_registration;
+        context_registration.callback = &notify_ip_address_callback;
+        context_registration.context = &notify;
+        att_server_request_to_send_notification(&context_registration, con_handle);
+    }
+
     if (le_notification_enabled) 
     {
         att_server_request_can_send_now_event(con_handle);

@@ -16,4 +16,7 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
+#include "rpi2350_ha_ble_pub.h"
+#include "rpi2350_ha_wifi_pub.h"
+
 #endif /* _RPI2350_HA_OS_SCHED_INF_H */
