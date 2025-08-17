@@ -25,9 +25,6 @@ void rpi2350_ha_wifi_init(void)
 void rpi2350_ha_wifi_10ms() 
 {    
     int rc;
-    struct udp_pcb* pcb = udp_new();
-    ip_addr_t addr;
-    ipaddr_aton(BEACON_TARGET, &addr);
     int counter = 0;
 
     if((rpi2350_ha_ble_st != 0) &&
@@ -36,7 +33,6 @@ void rpi2350_ha_wifi_10ms()
         cyw43_arch_enable_sta_mode();   
         rc = cyw43_arch_wifi_connect_async(rpi2350_ha_ble_ssid, rpi2350_ha_ble_password,
                                             CYW43_AUTH_WPA2_AES_PSK);
-
         if (rc != 0) 
         {
             rpi2350_ha_wifi_st = 0;      
@@ -45,6 +41,10 @@ void rpi2350_ha_wifi_10ms()
         {
             rpi2350_ha_wifi_st = 1;
         }
+
+        struct udp_pcb* pcb = udp_new();
+        ip_addr_t addr;
+        ipaddr_aton(BEACON_TARGET, &addr);
     }
                
     if(rpi2350_ha_wifi_st == 1)
