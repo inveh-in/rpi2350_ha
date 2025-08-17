@@ -5,7 +5,7 @@
 #include "rpi2350_ha_ble_inf.h"
 #include "rpi2350_ha_ble_priv.h"
 #include "rpi2350_ha_ble_pub.h"
-#include "rpi2350_ha_wifi_provisioning.h"  /* exclusively for attribute_handle_t */
+#include "rpi2350_ha_ble_provisioning.h"  /* exclusively for attribute_handle_t */
 typedef enum {
     WIFI_SSID_HANDLE = ATT_CHARACTERISTIC_be3d7601_0ea0_4e96_82e0_89aa6a3dc19f_01_VALUE_HANDLE,
     WIFI_PASSWORD_HANDLE = ATT_CHARACTERISTIC_be3d7602_0ea0_4e96_82e0_89aa6a3dc19f_01_VALUE_HANDLE,
@@ -15,13 +15,13 @@ typedef enum {
     IP_ADDRESS_USER_DESCRIPTION_HANDLE = ATT_CHARACTERISTIC_be3d7603_0ea0_4e96_82e0_89aa6a3dc19f_01_USER_DESCRIPTION_HANDLE,
 } attribute_handle_t;
 
-static device_state_t current_state = DEVICE_START_UP;
 static wifi_setting_t wifi_setting;
 static int le_notification_enabled;
 hci_con_handle_t con_handle;
 static btstack_packet_callback_registration_t hci_event_callback_registration;
 static btstack_packet_callback_registration_t sm_event_callback_registration;
-int rpi2350_ble_st = 0;
+static uint64_t last_toggle_time = 0;
+int rpi2350_ha_ble_st = 0;
 
 #define APP_AD_FLAGS 0x06
 
@@ -228,7 +228,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
 
             if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) 
             {
-                process_event(EVENT_WIFI_CONNECT);
+                rpi2350_ha_ble_st = 1;
             }
         }
         break;
@@ -244,7 +244,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
 
             if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) 
             {
-                process_event(EVENT_WIFI_CONNECT);
+                rpi2350_ha_ble_st = 1;
             }
         }
         break;
@@ -422,28 +422,22 @@ static void sm_event_handler(uint8_t packet_type, uint16_t channel, uint8_t *pac
  * @brief Controls device-specific tasks unrelated to Wi-Fi or BLE, such as LED blinking based on
  * the device state.
  */
-static void device_task(void) {
-    static uint64_t last_toggle_time = 0;
+static void device_task(void) 
+{
     bool led_state = cyw43_arch_gpio_get(CYW43_WL_GPIO_LED_PIN);
 
-    switch (current_state) {
-        case DEVICE_WIFI_LINK_DOWN:
-        case DEVICE_WIFI_LINK_TO_UP:
-        case DEVICE_WIFI_LINK_UP:
-            if (time_us_64() - last_toggle_time > LED_BLINK_INTERVAL_US)
-            {
-                cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, !led_state);
-                last_toggle_time = time_us_64();
-            }
-            break;
-        case DEVICE_RUNNING:
-            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, true);
-            break;
-        default:
-            if (led_state)
-                cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, false);
-            break;
+    if(rpi2350_ha_ble_st != 0)
+    {
+        cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, true);
     }
+    else
+    {
+        if (time_us_64() - last_toggle_time > LED_BLINK_INTERVAL_US)
+        {
+            cyw43_arch_gpio_put(CYW43_WL_GPIO_LED_PIN, !led_state);
+            last_toggle_time = time_us_64();
+        }
+    }   
 }
 
 void rpi2350_ha_ble_init()
@@ -470,8 +464,6 @@ void rpi2350_ha_ble_init()
     sm_set_authentication_requirements(SM_AUTHREQ_NO_BONDING);
 
     hci_power_control(HCI_POWER_ON);
-
-    current_state = DEVICE_WIFI_LINK_DOWN;
 }
 
 void rpi2350_ha_ble_10ms()

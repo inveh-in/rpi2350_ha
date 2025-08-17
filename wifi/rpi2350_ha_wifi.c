@@ -2,9 +2,9 @@
  * Copyright (c) inveh.
  *
  */
-#include "rpi2350_ha_inf.h"
-#include "rpi2350_ha_priv.h"
-#include "rpi2350_ha_pub.h"
+#include "rpi2350_ha_wifi_inf.h"
+#include "rpi2350_ha_wifi_priv.h"
+#include "rpi2350_ha_wifi_pub.h"
 
 /* Value for the UDP protocol */
 #define UDP_PORT 13400
