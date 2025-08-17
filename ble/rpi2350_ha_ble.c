@@ -22,6 +22,8 @@ static btstack_packet_callback_registration_t hci_event_callback_registration;
 static btstack_packet_callback_registration_t sm_event_callback_registration;
 static uint64_t last_toggle_time = 0;
 int rpi2350_ha_ble_st = 0;
+char rpi2350_ha_ble_ssid[33];
+char rpi2350_ha_ble_password[64];
 
 #define APP_AD_FLAGS 0x06
 
@@ -228,6 +230,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
 
             if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) 
             {
+                memcpy(rpi2350_ha_ble_ssid, wifi_setting.ssid, buffer_size);
                 rpi2350_ha_ble_st = 1;
             }
         }
@@ -244,6 +247,7 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
 
             if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) 
             {
+                memcpy(rpi2350_ha_ble_password, wifi_setting.password, buffer_size);
                 rpi2350_ha_ble_st = 1;
             }
         }

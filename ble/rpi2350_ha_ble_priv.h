@@ -7,7 +7,6 @@ typedef struct {
     char ip_address[16];
     uint8_t link_status;
 } wifi_setting_t;
-
 typedef struct {
     char *data;
     size_t len;

@@ -36,7 +36,7 @@ void rpi2350_ha_wifi_10ms()
     if((rpi2350_ha_ble_st != 0) &&
         (rpi2350_ha_wifi_st == 0))
     {        
-        rc = cyw43_arch_wifi_connect_async(wifi_setting.ssid, wifi_setting.password,
+        rc = cyw43_arch_wifi_connect_async(rpi2350_ha_ble_ssid, rpi2350_ha_ble_password,
                                             CYW43_AUTH_WPA2_AES_PSK);
         if (rc != 0) 
         {
