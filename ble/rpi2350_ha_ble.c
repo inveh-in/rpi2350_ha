@@ -225,12 +225,15 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
             {
                 retVal = ATT_ERROR_INVALID_ATTRIBUTE_VALUE_LENGTH;
             }
+
             memcpy(wifi_setting.ssid, buffer, buffer_size);
+            memcpy(rpi2350_ha_ble_ssid, buffer, buffer_size);
+
             wifi_setting.ssid[buffer_size] = '\0';
+            rpi2350_ha_ble_ssid[buffer_size] = '\0';
 
             if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) 
             {
-                memcpy(rpi2350_ha_ble_ssid, wifi_setting.ssid, buffer_size);
                 rpi2350_ha_ble_st = 1;
             }
         }
@@ -242,12 +245,15 @@ static int att_write_callback(hci_con_handle_t connection_handle, uint16_t att_h
             {
                 retVal = ATT_ERROR_INVALID_ATTRIBUTE_VALUE_LENGTH;
             }
+
             memcpy(wifi_setting.password, buffer, buffer_size);
+            memcpy(rpi2350_ha_ble_password, buffer, buffer_size);
+
             wifi_setting.password[buffer_size] = '\0';
+            rpi2350_ha_ble_password[buffer_size] = '\0';
 
             if (strlen(wifi_setting.ssid) > 0 && strlen(wifi_setting.password) > 0) 
-            {
-                memcpy(rpi2350_ha_ble_password, wifi_setting.password, buffer_size);
+            {                
                 rpi2350_ha_ble_st = 1;
             }
         }
