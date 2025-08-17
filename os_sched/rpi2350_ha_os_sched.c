@@ -107,8 +107,8 @@ void rpi2350_ha_core1_proc(__unused void *params)
     }
 }
 
-int main() {
-
+int main() 
+{
     TaskHandle_t taskHandle_Core0;
     TaskHandle_t taskHandle_Core1;
 

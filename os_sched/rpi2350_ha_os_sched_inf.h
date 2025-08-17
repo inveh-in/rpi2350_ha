@@ -16,12 +16,4 @@
 #include "FreeRTOS.h"
 #include "task.h"
 
-/* for LwIP */
-#include "lwip/pbuf.h"
-#include "lwip/udp.h"
-
-/* for BLE */
-#include "btstack.h"
-#include "pico/btstack_cyw43.h"
-
 #endif /* _RPI2350_HA_OS_SCHED_INF_H */

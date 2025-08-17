@@ -27,7 +27,7 @@ add_executable(rpi2350_ha
 )
 
 pico_btstack_make_gatt_header(rpi2350_ha
-    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/wifi/wifi_provisioning.gatt")
+    PRIVATE "${CMAKE_CURRENT_LIST_DIR}/wifi/rpi2350_ha_wifi_provisioning.gatt")
 
 # Add include directories
 target_include_directories(rpi2350_ha
