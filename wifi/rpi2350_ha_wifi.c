@@ -12,17 +12,14 @@
 #define BEACON_TARGET "255.255.255.255"
 #define BEACON_INTERVAL_MS 1000
 
-int rpi2350_ha_wifi_st = 0;
+int rpi2350_ha_wifi_st;
 
 /**
  * @brief Initializes the Wi-Fi functionality using the CYW43 driver.
  */
 void rpi2350_ha_wifi_init(void) 
 {
-    int rc;
-
-    cyw43_arch_enable_sta_mode();
-    rc = cyw43_wifi_leave(&cyw43_state, CYW43_ITF_STA);
+    rpi2350_ha_wifi_st = 0;
 }
 
 void rpi2350_ha_wifi_10ms() 
@@ -35,12 +32,14 @@ void rpi2350_ha_wifi_10ms()
 
     if((rpi2350_ha_ble_st != 0) &&
         (rpi2350_ha_wifi_st == 0))
-    {        
+    {     
+        cyw43_arch_enable_sta_mode();   
         rc = cyw43_arch_wifi_connect_async(rpi2350_ha_ble_ssid, rpi2350_ha_ble_password,
                                             CYW43_AUTH_WPA2_AES_PSK);
+
         if (rc != 0) 
         {
-            rpi2350_ha_wifi_st = 0;
+            rpi2350_ha_wifi_st = 0;      
         }
         else
         {
