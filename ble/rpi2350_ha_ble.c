@@ -482,7 +482,7 @@ void rpi2350_ha_ble_10ms()
 {
     device_task();
 
-    if ((rpi2350_ha_wifi_st != 0) &&
+    if ((rpi2350_ha_wifi_st == DEVICE_WIFI_RUNNING) &&
         (rpi2350_ha_ble_fdbck == 0))
     {
         notify_string_t notify;
