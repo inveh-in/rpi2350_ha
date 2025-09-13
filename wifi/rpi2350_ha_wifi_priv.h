@@ -1,7 +1,14 @@
 #ifndef _RPI2350_HA_WIFI_PRIV_H
 #define _RPI2350_HA_WIFI_PRIV_H
 
-
+typedef enum {
+    DEVICE_START_UP = 0,
+    DEVICE_WIFI_LINK_DOWN,
+    DEVICE_WIFI_LINK_UP,
+    DEVICE_WIFI_LINK_CONNECTED,
+    DEVICE_RUNNING,
+    DEVICE_ERROR
+} wifi_device_state_t;
 
 
 

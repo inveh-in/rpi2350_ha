@@ -2,6 +2,7 @@
  * Copyright (c) inveh.
  *
  */
+#include "rpi2350_ha_wifi_priv.h"
 #include "rpi2350_ha_ble_inf.h"
 #include "rpi2350_ha_ble_priv.h"
 #include "rpi2350_ha_ble_pub.h"

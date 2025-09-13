@@ -12,7 +12,7 @@
 #define BEACON_TARGET "255.255.255.255"
 #define BEACON_INTERVAL_MS 1000
 
-int rpi2350_ha_wifi_st;
+wifi_device_state_t rpi2350_ha_wifi_st;
 int counter = 0;
 ip_addr_t addr;
 struct udp_pcb* pcb;
@@ -22,48 +22,69 @@ struct udp_pcb* pcb;
  */
 void rpi2350_ha_wifi_init(void) 
 {
-    rpi2350_ha_wifi_st = 0;
+    rpi2350_ha_wifi_st = DEVICE_START_UP;
 }
 
 void rpi2350_ha_wifi_1000ms() 
 {    
     int rc;
 
-    if((rpi2350_ha_ble_st != 0) &&
-        (rpi2350_ha_wifi_st == 0))
-    {     
-        cyw43_arch_enable_sta_mode();   
-        rc = cyw43_arch_wifi_connect_timeout_ms(rpi2350_ha_ble_ssid, rpi2350_ha_ble_password, CYW43_AUTH_WPA2_AES_PSK, 30000);
-   
-        if (rc != 0) 
-        {
-            rpi2350_ha_wifi_st = 0;      
-        }
-        else
-        {
-            rpi2350_ha_wifi_st = 1;
-        }
-
-        pcb = udp_new();
-        ipaddr_aton(BEACON_TARGET, &addr);
-    }
-               
-    if(rpi2350_ha_wifi_st == 1)
+    switch (rpi2350_ha_wifi_st)
     {
-        struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX+1, PBUF_RAM);
-        char *req = (char *)p->payload;
-        memset(req, 0, BEACON_MSG_LEN_MAX+1);
-        snprintf(req, BEACON_MSG_LEN_MAX, "%d\n", counter);
-        err_t er = udp_sendto(pcb, p, &addr, UDP_PORT);
-        pbuf_free(p);
-        if (er != ERR_OK) {
-            printf("Failed to send UDP packet! error=%d\n", er);
-        } else {
-            printf("Sent packet %d\n", counter);
-            counter++;
+        case DEVICE_START_UP:
+        case DEVICE_WIFI_LINK_DOWN:
+        {
+            if(rpi2350_ha_ble_st != 0)
+            {     
+                cyw43_arch_enable_sta_mode();   
+                rc = cyw43_arch_wifi_connect_timeout_ms(rpi2350_ha_ble_ssid, rpi2350_ha_ble_password, CYW43_AUTH_WPA2_AES_PSK, 30000);
+        
+                if (rc != 0) 
+                {
+                    rpi2350_ha_wifi_st = DEVICE_WIFI_LINK_DOWN;      
+                }
+                else
+                {
+                    rpi2350_ha_wifi_st = DEVICE_WIFI_LINK_UP;
+                }
+
+                pcb = udp_new();
+                ipaddr_aton(BEACON_TARGET, &addr);
+            }
         }
+        break;
+
+        case DEVICE_WIFI_LINK_UP:
+        {
+            struct pbuf *p = pbuf_alloc(PBUF_TRANSPORT, BEACON_MSG_LEN_MAX+1, PBUF_RAM);
+            char *req = (char *)p->payload;
+            memset(req, 0, BEACON_MSG_LEN_MAX+1);
+            snprintf(req, BEACON_MSG_LEN_MAX, "%d\n", counter);
+            err_t er = udp_sendto(pcb, p, &addr, UDP_PORT);
+            pbuf_free(p);
+            if (er != ERR_OK) 
+            {
+                printf("Failed to send UDP packet! error=%d\n", er);
+
+                rpi2350_ha_wifi_st = DEVICE_ERROR;
+            } 
+            else 
+            {
+                printf("Sent packet %d\n", counter);
+                counter++;
+
+                rpi2350_ha_wifi_st = DEVICE_WIFI_LINK_UP;
+            }
+        }
+        break;
+
+        default: /* DEVICE_ERROR */
+        {
+            /* This situation be never arrived */
+            cyw43_arch_deinit();
+        }
+        break;
     }
 
-    /* This situation be never arrived
-     * cyw43_arch_deinit(); */
+
 }
