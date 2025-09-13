@@ -22,6 +22,7 @@ static btstack_packet_callback_registration_t hci_event_callback_registration;
 static btstack_packet_callback_registration_t sm_event_callback_registration;
 static uint64_t last_toggle_time = 0;
 int rpi2350_ha_ble_st = 0;
+int rpi2350_ha_ble_fdbck = 0;
 char rpi2350_ha_ble_ssid[33];
 char rpi2350_ha_ble_password[64];
 
@@ -480,7 +481,8 @@ void rpi2350_ha_ble_10ms()
 {
     device_task();
 
-    if (rpi2350_ha_wifi_st != 0) 
+    if ((rpi2350_ha_wifi_st != 0) &&
+        (rpi2350_ha_ble_fdbck == 0))
     {
         notify_string_t notify;
         notify.data = wifi_setting.ip_address;
@@ -490,6 +492,8 @@ void rpi2350_ha_ble_10ms()
         context_registration.callback = &notify_ip_address_callback;
         context_registration.context = &notify;
         att_server_request_to_send_notification(&context_registration, con_handle);
+
+        rpi2350_ha_ble_fdbck = 1;
     }
 
     if (le_notification_enabled) 
